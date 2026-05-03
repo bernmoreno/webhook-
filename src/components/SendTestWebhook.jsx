@@ -1,7 +1,7 @@
 // SendTestWebhook.jsx — form to fire a test event from the UI
 import { useState } from 'react';
 import { useWebhookContext } from '../context/WebhookContext';
-import { apiSetupHint, apiUrl, isApiConfigured, parseJsonSafe } from '../utils/api';
+import { apiSetupHint, apiUrl, isApiConfigured, isDemoMode, parseJsonSafe } from '../utils/api';
 
 const SOURCES = ['github', 'stripe', 'shopify', 'slack', 'custom'];
 const EVENTS  = ['push', 'pull_request', 'payment_intent', 'order_created', 'message', 'ping'];
@@ -14,6 +14,11 @@ const SendTestWebhook = () => {
   const [result, setResult]   = useState(null);   // { ok, message }
 
   const handleSend = async () => {
+    if (isDemoMode) {
+      setResult({ ok: false, message: `Demo mode: sending is disabled. ${apiSetupHint}` });
+      return;
+    }
+
     setSending(true);
     setResult(null);
     try {
@@ -63,11 +68,11 @@ const SendTestWebhook = () => {
 
         <button
           onClick={handleSend}
-          disabled={sending}
+          disabled={sending || isDemoMode}
           className="self-end sm:self-auto px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
                      hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {sending ? 'Sending…' : 'Send →'}
+          {isDemoMode ? 'Unavailable in demo mode' : (sending ? 'Sending…' : 'Send →')}
         </button>
       </div>
 
