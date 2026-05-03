@@ -1,6 +1,6 @@
 // useWebhooks.js — domain hook that wraps polling + mutations
 import { useState, useEffect, useCallback } from 'react';
-import { apiUrl } from '../utils/api';
+import { apiUrl, formatApiError } from '../utils/api';
 
 const POLL_INTERVAL_MS = 4_000;
 
@@ -20,7 +20,7 @@ export const useWebhooks = () => {
   const fetchEvents = useCallback(async () => {
     try {
       const res = await fetch(apiUrl('/api/webhooks'));
-      if (!res.ok) throw new Error(`Failed to fetch events: ${res.status}`);
+      if (!res.ok) throw new Error(formatApiError(res.status, 'Failed to fetch events'));
       const data = await res.json();
       setEvents(data);
       setError(null);

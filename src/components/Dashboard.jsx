@@ -2,7 +2,7 @@
 import Header from './Header';
 import WebhookList from './WebhookList';
 import SendTestWebhook from './SendTestWebhook';
-import { webhookEndpoint } from '../utils/api';
+import { apiSetupHint, isApiConfigured, webhookEndpoint } from '../utils/api';
 
 const Dashboard = () => (
   <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -21,6 +21,13 @@ const Dashboard = () => (
 
         {/* Right sidebar */}
         <aside className="space-y-6">
+          {!isApiConfigured && (
+            <div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4 text-sm text-amber-200">
+              <p className="font-semibold">Backend not configured for production</p>
+              <p className="mt-1 text-xs leading-5">{apiSetupHint}</p>
+            </div>
+          )}
+
           <SendTestWebhook />
 
           {/* Info card */}

@@ -1,7 +1,7 @@
 // SendTestWebhook.jsx — form to fire a test event from the UI
 import { useState } from 'react';
 import { useWebhookContext } from '../context/WebhookContext';
-import { apiUrl } from '../utils/api';
+import { apiSetupHint, apiUrl, isApiConfigured, parseJsonSafe } from '../utils/api';
 
 const SOURCES = ['github', 'stripe', 'shopify', 'slack', 'custom'];
 const EVENTS  = ['push', 'pull_request', 'payment_intent', 'order_created', 'message', 'ping'];
@@ -31,8 +31,18 @@ const SendTestWebhook = () => {
         }),
       });
 
-      const data = await res.json();
-      setResult({ ok: res.ok, message: res.ok ? `Sent — id: ${data.id?.slice(0, 8)}…` : (data.error ?? 'Failed') });
+      const data = await parseJsonSafe(res);
+      const defaultError =
+        (!isApiConfigured && import.meta.env.PROD && res.status === 404)
+          ? `Failed: 404. ${apiSetupHint}`
+          : `Failed: ${res.status}`;
+
+      setResult({
+        ok: res.ok,
+        message: res.ok
+          ? `Sent — id: ${data?.id?.slice(0, 8) ?? 'unknown'}…`
+          : (data?.error ?? data?.message ?? defaultError),
+      });
       if (res.ok) refresh();
     } catch (err) {
       setResult({ ok: false, message: err?.message ?? 'Network error' });
